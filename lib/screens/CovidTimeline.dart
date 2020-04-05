@@ -5,6 +5,7 @@ import 'package:fightcorona/model/CovideDataLocalModel.dart';
 import 'package:fightcorona/utils/Constants.dart';
 import 'package:fightcorona/widget/DataRowWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
 class CovidTimeLine extends StatefulWidget {
@@ -18,57 +19,124 @@ class _CovidTimeLineState extends State<CovidTimeLine> {
   List<Statewise> _statewise;
   List<Tested> _tested;
 
-  void _callWeatherApi() {
-    var api = new CovidDataApi();
-    api.getCovidData().then((response) {
-      setState(() {
-        _casesTimeSeries = response.casesTimeSeries;
-        _keyValues = response.keyValues;
-        _statewise = response.statewise;
-        _tested = response.tested;
-
-        var total = _statewise.firstWhere((obj) => obj.state == 'Total');
-        covidDataLocalModelTotal = new CovidDataLocalModel.AllCases(
-          activeCases: total.active,
-          activeNewCases: total.delta.active.toString(),
-          deceasedNewCases: total.delta.deaths.toString(),
-          deceasedCases: total.deaths,
-          recoveredNewCases: total.delta.recovered.toString(),
-          recoveredCases: total.recovered,
-          confirmedCases: total.confirmed,
-          confirmedNewCases: total.delta.confirmed.toString(),
-        );
-      });
-    }, onError: (error) {
-      setState(() {
-        _casesTimeSeries = null;
-        _keyValues = null;
-        _statewise = null;
-        _tested = null;
-      });
-    });
-  }
-
-  CovidDataLocalModel covidDataLocalModelTotal;
-
   @override
   void initState() {
     super.initState();
-    _callWeatherApi();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Flexible(
-              child: DataRowWidget(
-                covidDataLocalModel: covidDataLocalModelTotal,
-              ),
-            )
-          ],
+      body: SafeArea(
+        child: Container(
+          child: FutureBuilder(
+            future: new CovidDataApi().getCovidData(),
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                var data = snapshot.data as CovidData;
+                var total =
+                    data.statewise.firstWhere((obj) => obj.state == 'Total');
+                _statewise = data.statewise
+                    .where((_state) => _state.state != 'Total')
+                    .toList();
+                var covidDataLocalModelTotal = new CovidDataLocalModel.AllCases(
+                  activeCases: total.active,
+                  activeNewCases: total.delta?.active == null
+                      ? '0'
+                      : total.delta?.active.toString(),
+                  deceasedNewCases: total.delta?.deaths == null
+                      ? '0'
+                      : total.delta.deaths.toString(),
+                  deceasedCases: total.deaths,
+                  recoveredNewCases: total.delta?.recovered == null
+                      ? '0'
+                      : total.delta.recovered.toString(),
+                  recoveredCases: total.recovered,
+                  confirmedCases: total.confirmed,
+                  confirmedNewCases: total.delta?.confirmed == null
+                      ? '0'
+                      : total.delta.confirmed.toString(),
+                );
+                return Column(
+                  children: <Widget>[
+                    DataRowWidget(
+                      covidDataLocalModel: covidDataLocalModelTotal,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: Colors.black,
+                    ),
+                    Text(
+                      'State Wise',
+                      style: kHeadingTextStyle,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _statewise == null ? 0 : _statewise.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(
+                              title: Text(_statewise[index].state),
+                              subtitle: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                      child: Text(
+                                    _statewise[index].confirmed,
+                                    style: kBodyTextStyle.copyWith(
+                                        color: Colors.redAccent),
+                                  )),
+                                  Expanded(
+                                      child: Text(
+                                    _statewise[index].active,
+                                    style: kBodyTextStyle.copyWith(
+                                        color: Colors.blueAccent),
+                                  )),
+                                  Expanded(
+                                      child: Text(
+                                    _statewise[index].recovered,
+                                    style: kBodyTextStyle.copyWith(
+                                        color: Colors.greenAccent),
+                                  )),
+                                  Expanded(
+                                      child: Text(
+                                    _statewise[index].deaths,
+                                    style: kBodyTextStyle.copyWith(
+                                        color: Colors.blueGrey),
+                                  )),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Center(child: CircularProgressIndicator());
+            },
+          ),
         ),
       ),
     );
@@ -86,19 +154,5 @@ class CovidDataApi {
     } else {
       print("response failed");
     }
-//    return new CurrentWeather.fromJson(responseJson);
   }
 }
-
-/*new Scaffold(
-      body: Container(
-        child: Table(
-          children: _statewise
-              .map((item) => TableRow(children: [
-                    Text(item.confirmed),
-                    Text(item.active),
-                  ]))
-              .toList(),
-        ),
-      ),
-    );*/

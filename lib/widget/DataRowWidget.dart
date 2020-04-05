@@ -9,49 +9,102 @@ class DataRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: <Widget>[
-        Flexible(
-          child: Column(
-            children: <Widget>[
-              Text(
-                'Confirmed Cases',
-                style: kHeadingTextStyle.copyWith(color: Colors.redAccent),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Confirmed Cases',
+                    style: kHeadingTextStyle.copyWith(color: Colors.redAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    covidDataLocalModel.confirmedCases,
+                    style: kBodyTextStyle.copyWith(color: Colors.redAccent),
+                  ),
+                  Text(
+                    '+${covidDataLocalModel.confirmedNewCases}',
+                    style: kBodyTextStyle.copyWith(color: Colors.redAccent),
+                  ),
+                ],
               ),
-              Text(covidDataLocalModel.confirmedCases),
-              Text(covidDataLocalModel.confirmedNewCases),
-            ],
-          ),
+            ),
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Active Cases',
+                    style: kHeadingTextStyle.copyWith(color: Colors.blueAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    covidDataLocalModel.activeCases,
+                    style: kBodyTextStyle.copyWith(color: Colors.blueAccent),
+                  ),
+                  Text(
+                    '+${covidDataLocalModel.activeNewCases}',
+                    style: kBodyTextStyle.copyWith(color: Colors.blueAccent),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        Flexible(
-          child: Column(
-            children: <Widget>[
-              Text('Active Cases',
-                  style: kHeadingTextStyle.copyWith(color: Colors.blueAccent)),
-              Text(covidDataLocalModel.activeCases),
-              Text(covidDataLocalModel.activeNewCases),
-            ],
-          ),
+        SizedBox(
+          height: 10,
         ),
-        Flexible(
-          child: Column(
-            children: <Widget>[
-              Text('Recovered Cases',
-                  style: kHeadingTextStyle.copyWith(color: Colors.greenAccent)),
-              Text(covidDataLocalModel.recoveredCases),
-              Text(covidDataLocalModel.recoveredNewCases),
-            ],
-          ),
-        ),
-        Flexible(
-          child: Column(
-            children: <Widget>[
-              Text('Deceased Cases',
-                  style: kHeadingTextStyle.copyWith(color: Colors.blueGrey)),
-              Text(covidDataLocalModel.deceasedCases),
-              Text(covidDataLocalModel.deceasedNewCases),
-            ],
-          ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Recovered Cases',
+                    style:
+                        kHeadingTextStyle.copyWith(color: Colors.greenAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    covidDataLocalModel.recoveredCases,
+                    style: kBodyTextStyle.copyWith(color: Colors.greenAccent),
+                  ),
+                  Text(
+                    '+${covidDataLocalModel.recoveredNewCases}',
+                    style: kBodyTextStyle.copyWith(color: Colors.greenAccent),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Deceased Cases',
+                    style: kHeadingTextStyle.copyWith(color: Colors.blueGrey),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    covidDataLocalModel.deceasedCases,
+                    style: kBodyTextStyle.copyWith(color: Colors.blueGrey),
+                  ),
+                  Text(
+                    '+${covidDataLocalModel.deceasedNewCases}',
+                    style: kBodyTextStyle.copyWith(color: Colors.blueGrey),
+                  ),
+                ],
+              ),
+            )
+          ],
         )
       ],
     );
